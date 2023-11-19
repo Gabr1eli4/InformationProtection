@@ -147,28 +147,68 @@ function ECBMethodForm() {
     return result;
   };
 
+  const eExtension = (right: Uint8Array) => {
+    const result = new Uint8Array(new ArrayBuffer(48));
+
+    eTable.forEach((item, index) => {
+      if (Array.isArray(item)) {
+        item.forEach((pos) => (result[pos] = right[index]));
+      } else {
+        result[item] = right[index];
+      }
+    });
+
+    return result;
+  };
+
+  const getBitBlock = (input: string[], buffer: ArrayBuffer): Uint8Array => {
+    let block = input
+      .map((item) => item.codePointAt(0)?.toString(2).padStart(8, "0"))
+      .join("");
+
+    let view = new Uint8Array(buffer);
+
+    for (let i = 0; i < block.length; i++) {
+      view[i] = Number(block[i]);
+    }
+
+    return view;
+  };
+
+  const shift = (block: Uint8Array, table: number[]) => {};
+
+  const generateKey = (key: string) => {
+    let buffer = new ArrayBuffer(64);
+    let blockOfKey = getBitBlock(key.split(""), buffer);
+
+    blockOfKey = permutation(blockOfKey, dunno, 56);
+    let left = blockOfKey.slice(0, 28);
+    let right = blockOfKey.slice(28, 56);
+
+    for (let i = 0; i < 16; i++) {
+      left = shift(left, LSTable[i]);
+      right = shift(right, LSTable[i]);
+    }
+  };
+
   const encrypt: MouseEventHandler<HTMLButtonElement> = (event) => {
     event.preventDefault();
     const key = form?.key;
     const input = form?.input;
     const paddedInput = input.padEnd(Math.ceil(input.length / 8) * 8, " ");
-    const buffer = new ArrayBuffer(64);
+    const bufferInput = new ArrayBuffer(64);
+    const bufferCode = new ArrayBuffer(64);
 
     for (let i = 0; i < paddedInput.length / 8; i++) {
-      let blockOfCode = paddedInput
-        .substring(i * 8, (i + 1) * 8)
-        .split("")
-        .map((item) => item.codePointAt(0)?.toString(2).padStart(8, "0"))
-        .join("");
-      let view = new Uint8Array(buffer);
+      let blockOfCode = paddedInput.substring(i * 8, (i + 1) * 8).split("");
+      let blockOfInput = getBitBlock(blockOfCode, bufferInput);
+      let blockOfKey = getBitBlock(blockOfCode, bufferCode);
 
-      for (let i = 0; i < blockOfCode.length; i++) {
-        view[i] = Number(blockOfCode[i]);
+      const right = blockOfInput.slice(0, 32);
+      const left = blockOfInput.slice(32, 64);
+      for (let i = 0; i < 16; i++) {
+        const extension = eExtension(right);
       }
-
-      console.log(view);
-
-      console.log(permutation(view, initialPermutation, 64));
     }
   };
 
