@@ -134,6 +134,19 @@ function ECBMethodForm() {
     34, 53, 46, 42, 50, 36, 29, 32,
   ];
 
+  const eExtension = (right: Uint8Array) => {
+    const result: Uint8Array = new Uint8Array(new ArrayBuffer(48));
+
+    eTable.forEach((item, index) => {
+      if (Array.isArray(item)) {
+        item.forEach((item) => (result[item] = right[index]));
+      } else {
+        result[item] = right[index];
+      }
+    });
+    return result;
+  };
+
   const permutation = (
     str: Uint8Array,
     arr: number[],
@@ -149,7 +162,7 @@ function ECBMethodForm() {
 
   const encrypt: MouseEventHandler<HTMLButtonElement> = (event) => {
     event.preventDefault();
-    const key = form?.key;
+    let key = form?.key;
     const input = form?.input;
     const paddedInput = input.padEnd(Math.ceil(input.length / 8) * 8, " ");
     const buffer = new ArrayBuffer(64);
@@ -165,8 +178,11 @@ function ECBMethodForm() {
       for (let i = 0; i < blockOfCode.length; i++) {
         view[i] = Number(blockOfCode[i]);
       }
-
-      console.log(view);
+      let left = view.slice(0, 32);
+      let right = view.slice(32, 64);
+      for (let i = 0; i < 16; i++) {
+        eExtension(right);
+      }
 
       console.log(permutation(view, initialPermutation, 64));
     }
