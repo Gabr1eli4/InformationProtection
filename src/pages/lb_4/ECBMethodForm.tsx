@@ -39,13 +39,13 @@ function ECBMethodForm() {
 
   const getBitBlock = (input: string[], buffer: ArrayBuffer): Uint8Array => {
     let block = input
-      .map((item) => item.codePointAt(0)?.toString(2).padStart(8, "0"))
+      .map((item) => Number(item).toString(2).padStart(4, "0"))
       .join("");
 
     let view = new Uint8Array(buffer);
 
     for (let i = 0; i < block.length; i++) {
-      view[i] = Number(block[i]);
+      view[i] = +block[i];
     }
 
     return view;
@@ -68,11 +68,12 @@ function ECBMethodForm() {
   const generateKeys = (key: string) => {
     let buffer = new ArrayBuffer(64);
     let blockOfKey = getBitBlock(key.split(""), buffer);
+		console.log(blockOfKey);
 
     blockOfKey = permutation(blockOfKey, data.dunno, 56);
     let left = blockOfKey.slice(0, 28);
     let right = blockOfKey.slice(28, 56);
-    const result = new Array(new Uint8Array(48));
+    const result: Array<Uint8Array> = [] 
 
     for (let i = 0; i < 16; i++) {
       left = shift(left, data.LSTable[i]);
@@ -111,6 +112,7 @@ function ECBMethodForm() {
     event.preventDefault();
     let key = form?.key;
 		let keys = generateKeys(key);
+		console.log(keys);
 
 		reverseBinaryKey = keys.map(item => item.reverse());
 
@@ -160,48 +162,6 @@ function ECBMethodForm() {
 
   const decrypt: MouseEventHandler<HTMLButtonElement> = (event) => {
     event.preventDefault();
-    const input = form?.input;
-    const paddedInput = input.padEnd(Math.ceil(input.length / 8) * 8, " ");
-    const bufferInput = new ArrayBuffer(64);
-
-    for (let i = 0; i < paddedInput.length / 8; i++) {
-      let blockOfCode = paddedInput.substring(i * 8, (i + 1) * 8).split("");
-      let blockOfInput = getBitBlock(blockOfCode, bufferInput);
-
-      let right = blockOfInput.slice(0, 32);
-      let left = blockOfInput.slice(32, 64);
-      for (let i = 0; i < 16; i++) {
-        const extension = eExtension(right);
-        const gamma = gamming(extension, reverseBinaryKey[i]);
-
-        const sBox = new Array(8);
-        for (let j = 0; j < 8; j++) {
-          let row = parseInt([gamma[j * 6], gamma[j * 6 + 5]].join(""), 2);
-          let col = parseInt(gamma.slice(j * 6 + 1, j * 6 + 4).join(""), 2);
-          let value = data.sBlockTable[j][row][col]
-            .toString(2)
-            .padStart(4, "0");
-
-					const temp = new Uint8Array(new ArrayBuffer(4));
-					for (let k = 0; k < value.length; k++) {
-						temp[k] = +value[k];
-					}
-
-					sBox[j] = temp;
-        }
-				let block = permutation(flat(sBox), data.pTable, 32);
-				left = gamming(left, block);
-
-				if (i != 15) {
-					[left, right] = [right, left]
-				}
-      }
-			const combine = new Uint8Array([...left, ...right]);
-
-			const chiper_text = permutation(combine, data.finalPermutation, 64).join('');
-			const result = binToHex(chiper_text, 4);
-			console.log(result.join(''));
-		}
   };
 
   return (
