@@ -8,8 +8,7 @@ function ECBMethodForm() {
     input: "",
     textArea: "",
   });
-	let reverseKey = []
-	let reverseBinaryKey: Uint8Array[] = new Array(new Uint8Array());
+	const [reverseBinaryKey, setReverseBinaryKey] = useState<Array<Uint8Array>>([]);
 
   const eExtension = (right: Uint8Array) => {
     const result: Uint8Array = new Uint8Array(new ArrayBuffer(48));
@@ -39,7 +38,7 @@ function ECBMethodForm() {
 
   const getBitBlock = (input: string[], buffer: ArrayBuffer): Uint8Array => {
     let block = input
-      .map((item) => Number(item).toString(2).padStart(4, "0"))
+      .map((item) => item.codePointAt(0)?.toString(2).padStart(8, "0"))
       .join("");
 
     let view = new Uint8Array(buffer);
@@ -68,7 +67,6 @@ function ECBMethodForm() {
   const generateKeys = (key: string) => {
     let buffer = new ArrayBuffer(64);
     let blockOfKey = getBitBlock(key.split(""), buffer);
-		console.log(blockOfKey);
 
     blockOfKey = permutation(blockOfKey, data.dunno, 56);
     let left = blockOfKey.slice(0, 28);
@@ -90,20 +88,13 @@ function ECBMethodForm() {
     return block.map((item, index) => item ^ key[index]);
   };
 
-	const flat = (arr: Array<Uint8Array>) => {
-		const result = new Uint8Array(new ArrayBuffer(32));
-		for (let i = 0; i < arr.length; i++) {
-			for (let j = 0; j < arr[i].length; j++) {
-				result[(i + 1) * j] = (arr[i][j]);
-			}
-		}
-		return result;
-	}
-
-	const binToHex = (arr: string, size: number) => {
-		const result = []
+	const binToDec = (arr: string, size: number) => {
+		const result = [];
 		for (let i = 0; i < arr.length / size; i++) {
-			result.push(parseInt(arr.slice((i * size), (i * size) + size), 2));
+			const block = arr.slice((i * size), (i * size) + size);
+			console.log(block);
+			const char = parseInt(block, 2);
+			result.push(String.fromCharCode(char));
 		}
 		return result;
 	}
@@ -112,11 +103,8 @@ function ECBMethodForm() {
     event.preventDefault();
     let key = form?.key;
 		let keys = generateKeys(key);
-		console.log(keys);
 
-		reverseBinaryKey = keys.map(item => item.reverse());
-
-		reverseKey = binToHex(keys.join(""), 8).reverse();
+		setReverseBinaryKey(keys.reverse());
 
     const input = form?.input;
     const paddedInput = input.padEnd(Math.ceil(input.length / 8) * 8, " ");
@@ -124,6 +112,8 @@ function ECBMethodForm() {
     for (let i = 0; i < paddedInput.length / 8; i++) {
       let blockOfCode = paddedInput.substring(i * 8, (i + 1) * 8).split("");
       let blockOfInput = getBitBlock(blockOfCode, new ArrayBuffer(64));
+
+			blockOfInput = permutation(blockOfInput, data.initialPermutation, 64);
 
       let right = blockOfInput.slice(0, 32);
       let left = blockOfInput.slice(32, 64);
@@ -134,7 +124,57 @@ function ECBMethodForm() {
         const sBox = new Array(8);
         for (let j = 0; j < 8; j++) {
           let row = parseInt([gamma[j * 6], gamma[j * 6 + 5]].join(""), 2);
-          let col = parseInt(gamma.slice(j * 6 + 1, j * 6 + 4).join(""), 2);
+          let col = parseInt(gamma.slice(j * 6 + 1, j * 6 + 5).join(""), 2);
+          let value = data.sBlockTable[j][row][col]
+            .toString(2)
+            .padStart(4, "0");
+
+					const temp = new Uint8Array(new ArrayBuffer(4));
+					for (let k = 0; k < value.length; k++) {
+						temp[k] = +value[k];
+					}
+					sBox[j] = temp;
+        }
+
+				const flattened = Uint8Array.from(sBox.reduce((a, b) => [...a, ...b], []));
+				let block = permutation(flattened, data.pTable, 32);
+				left = gamming(left, block);
+
+				if (i != 15) {
+					[left, right] = [right, left]
+				}
+      }
+			const combine = new Uint8Array([...left, ...right]);
+			const chiper_text = permutation(combine, data.finalPermutation, 64).join('');
+			console.log(chiper_text);
+			const result = binToDec(chiper_text, 8).join("");
+			console.log(result);
+			setForm(prev => ({...prev, textArea: result}))
+    }
+  };
+
+  const decrypt: MouseEventHandler<HTMLButtonElement> = (event) => {
+    event.preventDefault();
+
+		const input = form?.input;
+    const paddedInput = input.padEnd(Math.ceil(input.length / 8) * 8, " ");
+
+    for (let i = 0; i < paddedInput.length / 8; i++) {
+      let blockOfCode = paddedInput.substring(i * 8, (i + 1) * 8).split("");
+      let blockOfInput = getBitBlock(blockOfCode, new ArrayBuffer(64));
+
+			blockOfInput = permutation(blockOfInput, data.initialPermutation, 64);
+
+      let right = blockOfInput.slice(0, 32);
+      let left = blockOfInput.slice(32, 64);
+      for (let i = 0; i < 16; i++) {
+        const extension = eExtension(right);
+        const gamma = gamming(extension, reverseBinaryKey[i]);
+
+        const sBox = new Array(8);
+        for (let j = 0; j < 8; j++) {
+          let row = parseInt([gamma[j * 6], gamma[j * 6 + 5]].join(""), 2);
+          let col = parseInt(gamma.slice(j * 6 + 1, j * 6 + 5).join(""), 2);
           let value = data.sBlockTable[j][row][col]
             .toString(2)
             .padStart(4, "0");
@@ -146,7 +186,8 @@ function ECBMethodForm() {
 
 					sBox[j] = temp;
         }
-				let block = permutation(flat(sBox), data.pTable, 32);
+				const flattened = Uint8Array.from(sBox.reduce((a, b) => [...a, ...b], []));
+				let block = permutation(flattened, data.pTable, 32);
 				left = gamming(left, block);
 
 				if (i != 15) {
@@ -155,14 +196,10 @@ function ECBMethodForm() {
       }
 			const combine = new Uint8Array([...left, ...right]);
 			const chiper_text = permutation(combine, data.finalPermutation, 64).join('');
-			const result = binToHex(chiper_text, 4);
-			console.log(result.join(''));
+			const result = binToDec(chiper_text, 8).join("");
+			setForm(prev => ({...prev, textArea: result}))
     }
-  };
-
-  const decrypt: MouseEventHandler<HTMLButtonElement> = (event) => {
-    event.preventDefault();
-  };
+	};
 
   return (
     <Form encrypt={encrypt} decrypt={decrypt} form={form} setForm={setForm} />
