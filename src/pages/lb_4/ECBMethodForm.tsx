@@ -15,9 +15,9 @@ function ECBMethodForm() {
 
     data.eTable.forEach((item, index) => {
       if (Array.isArray(item)) {
-        item.forEach((item) => (result[item] = right[index]));
+        item.forEach((j) => (result[j - 1] = right[index]));
       } else {
-        result[item] = right[index];
+        result[item - 1] = right[index];
       }
     });
     return result;
@@ -31,7 +31,7 @@ function ECBMethodForm() {
     const buffer = new ArrayBuffer(n);
     const result: Uint8Array = new Uint8Array(buffer);
     for (let i = 0; i < n; i++) {
-      result[i] = str[arr[i - 1]];
+      result[i] = str[arr[i] - 1];
     }
     return result;
   };
@@ -67,11 +67,12 @@ function ECBMethodForm() {
   const generateKeys = (key: string) => {
     let buffer = new ArrayBuffer(64);
     let blockOfKey = getBitBlock(key.split(""), buffer);
+    console.log(blockOfKey);
 
     blockOfKey = permutation(blockOfKey, data.dunno, 56);
     let left = blockOfKey.slice(0, 28);
-    let right = blockOfKey.slice(28, 56);
-    const result: Array<Uint8Array> = [] 
+    let right = blockOfKey.slice(28);
+    const result: Array<Uint8Array> = [];
 
     for (let i = 0; i < 16; i++) {
       left = shift(left, data.LSTable[i]);
@@ -92,7 +93,6 @@ function ECBMethodForm() {
 		const result = [];
 		for (let i = 0; i < arr.length / size; i++) {
 			const block = arr.slice((i * size), (i * size) + size);
-			console.log(block);
 			const char = parseInt(block, 2);
 			result.push(String.fromCharCode(char));
 		}
@@ -116,7 +116,7 @@ function ECBMethodForm() {
 			blockOfInput = permutation(blockOfInput, data.initialPermutation, 64);
 
       let right = blockOfInput.slice(0, 32);
-      let left = blockOfInput.slice(32, 64);
+      let left = blockOfInput.slice(32);
       for (let i = 0; i < 16; i++) {
         const extension = eExtension(right);
         const gamma = gamming(extension, keys[i]);
@@ -140,15 +140,13 @@ function ECBMethodForm() {
 				let block = permutation(flattened, data.pTable, 32);
 				left = gamming(left, block);
 
-				if (i != 15) {
+				if (i !== 15) {
 					[left, right] = [right, left]
 				}
       }
 			const combine = new Uint8Array([...left, ...right]);
 			const chiper_text = permutation(combine, data.finalPermutation, 64).join('');
-			console.log(chiper_text);
 			const result = binToDec(chiper_text, 8).join("");
-			console.log(result);
 			setForm(prev => ({...prev, textArea: result}))
     }
   };
@@ -156,7 +154,7 @@ function ECBMethodForm() {
   const decrypt: MouseEventHandler<HTMLButtonElement> = (event) => {
     event.preventDefault();
 
-		const input = form?.input;
+    const input = form?.textArea;
     const paddedInput = input.padEnd(Math.ceil(input.length / 8) * 8, " ");
 
     for (let i = 0; i < paddedInput.length / 8; i++) {
@@ -166,7 +164,7 @@ function ECBMethodForm() {
 			blockOfInput = permutation(blockOfInput, data.initialPermutation, 64);
 
       let right = blockOfInput.slice(0, 32);
-      let left = blockOfInput.slice(32, 64);
+      let left = blockOfInput.slice(32);
       for (let i = 0; i < 16; i++) {
         const extension = eExtension(right);
         const gamma = gamming(extension, reverseBinaryKey[i]);
@@ -183,9 +181,9 @@ function ECBMethodForm() {
 					for (let k = 0; k < value.length; k++) {
 						temp[k] = +value[k];
 					}
-
 					sBox[j] = temp;
         }
+
 				const flattened = Uint8Array.from(sBox.reduce((a, b) => [...a, ...b], []));
 				let block = permutation(flattened, data.pTable, 32);
 				left = gamming(left, block);
@@ -199,7 +197,7 @@ function ECBMethodForm() {
 			const result = binToDec(chiper_text, 8).join("");
 			setForm(prev => ({...prev, textArea: result}))
     }
-	};
+};
 
   return (
     <Form encrypt={encrypt} decrypt={decrypt} form={form} setForm={setForm} />
