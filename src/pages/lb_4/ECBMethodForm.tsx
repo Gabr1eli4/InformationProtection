@@ -67,7 +67,6 @@ function ECBMethodForm() {
   const generateKeys = (key: string) => {
     let buffer = new ArrayBuffer(64);
     let blockOfKey = getBitBlock(key.split(""), buffer);
-    console.log(blockOfKey);
 
     blockOfKey = permutation(blockOfKey, data.dunno, 56);
     let left = blockOfKey.slice(0, 28);
@@ -103,6 +102,7 @@ function ECBMethodForm() {
     event.preventDefault();
     let key = form?.key;
 		let keys = generateKeys(key);
+    console.log(keys);
 
 		setReverseBinaryKey(keys.reverse());
 
@@ -188,7 +188,7 @@ function ECBMethodForm() {
 				let block = permutation(flattened, data.pTable, 32);
 				left = gamming(left, block);
 
-				if (i != 15) {
+				if (i !== 15) {
 					[left, right] = [right, left]
 				}
       }
