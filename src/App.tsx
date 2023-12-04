@@ -5,6 +5,7 @@ import { SubstitutionMethodForm } from "./pages/lb_1/SubstitutionMethodForm";
 import { PermutationMethodForm } from "./pages/lb_2/PermutationMethodForm";
 import { GammingMethodForm } from "./pages/lb_3/GammingMethodForm";
 import { ECBMethodForm } from "./pages/lb_4/ECBMethodForm";
+import { CBCMethodForm } from "./pages/lb_5/CBCMethodForm";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="2" element={<PermutationMethodForm />} />
         <Route path="3" element={<GammingMethodForm />} />
         <Route path="4" element={<ECBMethodForm />} />
+        <Route path="5" element={<CBCMethodForm />}></Route>
       </Route>
     </Routes>
   );

@@ -28,8 +28,8 @@ function SubstitutionMethodForm() {
   };
 
   const parseString = (key: string): string[] => {
-    let result: string[] = [];
-    let arrLength = key.length;
+    const result: string[] = [];
+    const arrLength = key.length;
 
     for (let i = 0; i < Math.ceil(arrLength / size); i++) {
       result.push(key.slice(i * size, i * size + size));
@@ -91,7 +91,7 @@ function SubstitutionMethodForm() {
     event.preventDefault();
     if (form.input.length != 0) {
       const input = parseString(form.input);
-      let result = input
+      const result = input
         .map((item) => decryptTable[item.toLowerCase()])
         .join("");
 

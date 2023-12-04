@@ -15,8 +15,8 @@ interface FormFunctionProps {
   form: FormProps;
   setForm: React.Dispatch<SetStateAction<FormProps>>;
   setJsonData?: React.Dispatch<SetStateAction<FormProps | null>>;
-  keyValidate?: Function["prototype"];
-  inputValidate?: Function["prototype"];
+  keyValidate?: (string: string) => boolean;
+  inputValidate?: (string: string) => boolean;
 }
 
 function Form({
@@ -25,11 +25,11 @@ function Form({
   form,
   setForm,
   setJsonData,
-  keyValidate = Function.prototype,
-  inputValidate = Function.prototype,
+  keyValidate = () => false,
+  inputValidate = () => false,
 }: FormFunctionProps) {
-  const [isInputValid, setIsInputValid] = useState<Boolean>(true);
-  const [isKeyValid, setIsKeyValid] = useState<Boolean>(true);
+  const [isInputValid, setIsInputValid] = useState<boolean>(true);
+  const [isKeyValid, setIsKeyValid] = useState<boolean>(true);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (setJsonData) {
