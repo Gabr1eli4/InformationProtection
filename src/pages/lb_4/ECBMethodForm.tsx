@@ -12,7 +12,13 @@ function ECBMethodForm() {
   const permutation = (str: Uint8Array, arr: number[]): Uint8Array => {
     return new Uint8Array(arr.map(item => str[item - 1]));
   }
+  const permutation = (str: Uint8Array, arr: number[]): Uint8Array => {
+    return new Uint8Array(arr.map(item => str[item - 1]));
+  }
 
+  const getBitBlock = (input: string[]): Uint8Array => {
+    return new Uint8Array(input.map(item => item.codePointAt(0)?.toString(2).padStart(8, "0")).join("").split("").map(item => +item));
+  }
   const getBitBlock = (input: string[]): Uint8Array => {
     return new Uint8Array(input.map(item => item.codePointAt(0)?.toString(2).padStart(8, "0")).join("").split("").map(item => +item));
   }
@@ -20,10 +26,14 @@ function ECBMethodForm() {
   const shift = (block: Uint8Array, nth_shift: number) => {
     return new Uint8Array([...block.slice(nth_shift), ...block.slice(0, nth_shift)])
   }
+    return new Uint8Array([...block.slice(nth_shift), ...block.slice(0, nth_shift)])
+  }
 
   const generateKeys = (key: string) => {
     let blockOfKey = getBitBlock(key.split(""));
+    let blockOfKey = getBitBlock(key.split(""));
 
+    blockOfKey = permutation(blockOfKey, data.dunno);
     blockOfKey = permutation(blockOfKey, data.dunno);
     let left = blockOfKey.slice(0, 28);
     let right = blockOfKey.slice(28);
@@ -33,6 +43,7 @@ function ECBMethodForm() {
       left = shift(left, data.LSTable[i]);
       right = shift(right, data.LSTable[i]);
       let mergedKey = new Uint8Array([...left, ...right]);
+      let round_key = permutation(mergedKey, data.keyComp);
       let round_key = permutation(mergedKey, data.keyComp);
 
       result.push(round_key);
@@ -44,6 +55,28 @@ function ECBMethodForm() {
     return block.map((item, index) => item ^ key[index]);
   };
 
+  const binToDec = (arr: string, size: number) => {
+    const result = [];
+    for (let i = 0; i < arr.length / size; i++) {
+      const block = arr.slice((i * size), (i * size) + size);
+      const char = parseInt(block, 2);
+      result.push(String.fromCharCode(char));
+    }
+    return result;
+  }
+
+  const sBoxCalc = (block: Uint8Array): Uint8Array => {
+    const sBox = new Array(8);
+    for (let i = 0; i < 8; i++) {
+      let row = parseInt([block[i * 6], block[i * 6 + 5]].join(""), 2);
+      let col = parseInt(block.slice(i * 6 + 1, i * 6 + 5).join(""), 2);
+      let value = data.sBlockTable[i][row][col].toString(2).padStart(4, '0');
+
+      sBox[i] = value.split('').map(item => +item);
+    }
+
+    return Uint8Array.from(sBox.reduce((a, b) => [...a, ...b], []));
+  }
   const binToDec = (arr: string, size: number) => {
     const result = [];
     for (let i = 0; i < arr.length / size; i++) {
@@ -78,9 +111,14 @@ function ECBMethodForm() {
     for (let i = 0; i < paddedInput.length / 8; i++) {
       let blockOfCode = paddedInput.slice(i * 8, (i + 1) * 8).split("");
       let blockOfInput = getBitBlock(blockOfCode);
+      let blockOfCode = paddedInput.slice(i * 8, (i + 1) * 8).split("");
+      let blockOfInput = getBitBlock(blockOfCode);
 
       blockOfInput = permutation(blockOfInput, data.initialPermutation);
+      blockOfInput = permutation(blockOfInput, data.initialPermutation);
 
+      let left = blockOfInput.slice(0, 32);
+      let right = blockOfInput.slice(32);
       let left = blockOfInput.slice(0, 32);
       let right = blockOfInput.slice(32);
       for (let i = 0; i < 16; i++) {
@@ -90,11 +128,18 @@ function ECBMethodForm() {
         const flattened = sBoxCalc(gamma);
         let block = permutation(flattened, data.pTable);
         left = gamming(left, block);
+        const flattened = sBoxCalc(gamma);
+        let block = permutation(flattened, data.pTable);
+        left = gamming(left, block);
 
         if (i !== 15) {
           [left, right] = [right, left];
         }
       }
+      const combine = new Uint8Array([...left, ...right]);
+      const chiper_text = permutation(combine, data.finalPermutation).join('');
+      const result = binToDec(chiper_text, 8).join("");
+      setForm(prev => ({ ...prev, textArea: result }))
       const combine = new Uint8Array([...left, ...right]);
       const chiper_text = permutation(combine, data.finalPermutation).join('');
       const result = binToDec(chiper_text, 8).join("");
