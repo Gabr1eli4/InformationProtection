@@ -9,6 +9,8 @@ function CBCMethodForm() {
     textArea: "",
   });
 
+  const pseudoRandomSequence = [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0];
+
   const permutation = (str: Uint8Array, arr: number[]): Uint8Array => {
     return new Uint8Array(arr.map(item => str[item - 1]));
   }
@@ -71,6 +73,7 @@ function CBCMethodForm() {
     event.preventDefault();
     const key = form?.key;
     const keys = generateKeys(key);
+    // let bruh = new Uint8Array(pseudoRandomSequence);
 
     const input = form?.input;
     const paddedInput = input.padEnd(Math.ceil(input.length / 8) * 8, " ");
@@ -80,25 +83,28 @@ function CBCMethodForm() {
       const blockOfCode = paddedInput.slice(i * 8, (i + 1) * 8).split("");
       let blockOfInput = getBitBlock(blockOfCode);
 
+      // blockOfInput = gamming(blockOfInput, bruh);
+
       blockOfInput = permutation(blockOfInput, data.initialPermutation);
 
       let left = blockOfInput.slice(0, 32);
       let right = blockOfInput.slice(32);
-      for (let i = 0; i < 16; i++) {
+      for (let j = 0; j < 16; j++) {
         const extension = permutation(right, data.eTable);
-        const gamma = gamming(extension, keys[i]);
+        const gamma = gamming(extension, keys[j]);
 
         const flattened = sBoxCalc(gamma);
         const block = permutation(flattened, data.pTable);
         left = gamming(left, block);
 
-        if (i !== 15) {
+        if (j !== 15) {
           [left, right] = [right, left];
         }
       }
       const combine = new Uint8Array([...left, ...right]);
-      const chiper_text = permutation(combine, data.finalPermutation).join('');
-      result += binToDec(chiper_text, 8).join("");
+      const chiper_text = permutation(combine, data.finalPermutation);
+      result += binToDec(chiper_text.join(''), 8).join("");
+      // bruh = chiper_text;
     }
     setForm(prev => ({...prev, textArea: result}));
   };
@@ -108,6 +114,7 @@ function CBCMethodForm() {
     
     const key = form?.key;
     const keys = generateKeys(key).reverse();
+    // let bruh = new Uint8Array(pseudoRandomSequence);
 
     const input = form?.textArea;
 
@@ -120,21 +127,23 @@ function CBCMethodForm() {
 
       let left = blockOfInput.slice(0, 32);
       let right = blockOfInput.slice(32);
-      for (let i = 0; i < 16; i++) {
+      for (let j = 0; j < 16; j++) {
         const extension = permutation(right, data.eTable);
-        const gamma = gamming(extension, keys[i]);
+        const gamma = gamming(extension, keys[j]);
 
         const flattened = sBoxCalc(gamma);
         const block = permutation(flattened, data.pTable);
         left = gamming(left, block);
 
-        if (i !== 15) {
+        if (j !== 15) {
           [left, right] = [right, left];
         }
       }
       const combine = new Uint8Array([...left, ...right]);
-      const chiper_text = permutation(combine, data.finalPermutation).join('');
+      const chiper_text = permutation(combine, data.finalPermutation).join("")
+      // chiper_text = gamming(chiper_text, bruh);
       result += binToDec(chiper_text, 8).join("");
+      // bruh = blockOfInput;
     }
     setForm(prev => ({ ...prev, textArea: result }))
   };
