@@ -1,16 +1,18 @@
 import { ButtonHTMLAttributes, FC, MouseEventHandler } from "react";
 
-interface ButtonInterface extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonInterface extends ButtonHTMLAttributes<HTMLButtonElement>  {
   children: React.ReactNode;
-  callback: MouseEventHandler<HTMLButtonElement>;
+  onclick: MouseEventHandler<HTMLButtonElement>;
+  disabled?: boolean
 }
 
 const Button: FC<ButtonInterface> = ({
   children = "",
-  callback,
+  onclick,
+  disabled = false
 }: ButtonInterface) => {
   return (
-    <button className="button" onClick={callback}>
+    <button className="button" onClick={onclick} disabled={disabled}>
       {children}
     </button>
   );

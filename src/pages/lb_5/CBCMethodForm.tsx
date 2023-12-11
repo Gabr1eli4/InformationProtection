@@ -73,7 +73,7 @@ function CBCMethodForm() {
     event.preventDefault();
     const key = form?.key;
     const keys = generateKeys(key);
-    // let bruh = new Uint8Array(pseudoRandomSequence);
+    let bruh = new Uint8Array(pseudoRandomSequence);
 
     const input = form?.input;
     const paddedInput = input.padEnd(Math.ceil(input.length / 8) * 8, " ");
@@ -83,7 +83,7 @@ function CBCMethodForm() {
       const blockOfCode = paddedInput.slice(i * 8, (i + 1) * 8).split("");
       let blockOfInput = getBitBlock(blockOfCode);
 
-      // blockOfInput = gamming(blockOfInput, bruh);
+      blockOfInput = gamming(blockOfInput, bruh);
 
       blockOfInput = permutation(blockOfInput, data.initialPermutation);
 
@@ -104,7 +104,7 @@ function CBCMethodForm() {
       const combine = new Uint8Array([...left, ...right]);
       const chiper_text = permutation(combine, data.finalPermutation);
       result += binToDec(chiper_text.join(''), 8).join("");
-      // bruh = chiper_text;
+      bruh = chiper_text;
     }
     setForm(prev => ({...prev, textArea: result}));
   };
@@ -114,7 +114,7 @@ function CBCMethodForm() {
     
     const key = form?.key;
     const keys = generateKeys(key).reverse();
-    // let bruh = new Uint8Array(pseudoRandomSequence);
+    let bruh = new Uint8Array(pseudoRandomSequence);
 
     const input = form?.textArea;
 
@@ -122,6 +122,8 @@ function CBCMethodForm() {
     for (let i = 0; i < input.length / 8; i++) {
       const blockOfCode = input.slice(i * 8, (i + 1) * 8).split("");
       let blockOfInput = getBitBlock(blockOfCode);
+
+      const encblock = blockOfInput;
 
       blockOfInput = permutation(blockOfInput, data.initialPermutation);
 
@@ -140,16 +142,16 @@ function CBCMethodForm() {
         }
       }
       const combine = new Uint8Array([...left, ...right]);
-      const chiper_text = permutation(combine, data.finalPermutation).join("")
-      // chiper_text = gamming(chiper_text, bruh);
-      result += binToDec(chiper_text, 8).join("");
-      // bruh = blockOfInput;
+      let chiper_text = permutation(combine, data.finalPermutation);
+      chiper_text = gamming(chiper_text, bruh);
+      result += binToDec(chiper_text.join(''), 8).join("");
+      bruh = encblock;
     }
     setForm(prev => ({ ...prev, textArea: result }))
   };
 
   return (
-    <Form encrypt={encrypt} decrypt={decrypt} form={form} setForm={setForm} />
+    <Form encrypt={encrypt} decrypt={decrypt} form={form} setForm={setForm} keyValidate={() => form.key.length % 8 === 0}/>
   );
 }
 

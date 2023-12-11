@@ -140,7 +140,7 @@ function ECBMethodForm() {
   };
 
   return (
-    <Form encrypt={encrypt} decrypt={decrypt} form={form} setForm={setForm} />
+    <Form encrypt={encrypt} decrypt={decrypt} form={form} setForm={setForm} keyValidate={() => form.key.length % 8 === 0} />
   );
 }
 

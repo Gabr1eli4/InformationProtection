@@ -25,8 +25,8 @@ function Form({
   form,
   setForm,
   setJsonData,
-  keyValidate = () => false,
-  inputValidate = () => false,
+  keyValidate = () => true,
+  inputValidate = () => true,
 }: FormFunctionProps) {
   const [isInputValid, setIsInputValid] = useState<boolean>(true);
   const [isKeyValid, setIsKeyValid] = useState<boolean>(true);
@@ -56,9 +56,9 @@ function Form({
   };
 
   useEffect(() => {
-    if (form.input) setIsInputValid(inputValidate(form.input));
-    if (form.key) setIsKeyValid(keyValidate(form.key));
-  }, [form.input, form.key]);
+    setIsInputValid(inputValidate(form.input));
+    setIsKeyValid(keyValidate(form.key));
+  }, [form.input, form.key, inputValidate, keyValidate]);
 
   return (
     <form className="form">
@@ -68,7 +68,9 @@ function Form({
           placeholder="Input"
           value={form.input}
           onChange={(event) =>
-            setForm((prev) => ({ ...prev, input: event.target.value }))
+
+            setForm((prev) => ({ ...prev, input: event.target.value })
+          )
           }
         />
         {!isInputValid && (
@@ -96,11 +98,11 @@ function Form({
         }
       />
       <div className="button__section">
-        <Button key={1} callback={encrypt}>
+        <Button key={1} onclick={encrypt} disabled={!isInputValid || !isKeyValid}>
           Зашифровать
         </Button>
-        <input type="file" key={2} onChange={handleFileChange}></input>
-        <Button key={3} callback={decrypt}>
+        {setJsonData && <input type="file" key={2} onChange={handleFileChange}></input>}
+        <Button key={3} onclick={decrypt} disabled={!isInputValid || !isKeyValid}>
           Расшифровать
         </Button>
       </div>
