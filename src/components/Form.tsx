@@ -60,66 +60,54 @@ function Form({
 		setIsKeyValid(keyValidate(form.key));
 	}, [form.input, form.key, inputValidate, keyValidate]);
 
-	return (
-		<form className="form">
-			<div className="input__section">
-				<Input
-					type="text"
-					placeholder="Input"
-					value={form.input}
-					onChange={(event) =>
-						setForm((prev) => ({
-							...prev,
-							input: event.target.value,
-						}))
-					}
-				/>
-				{!isInputValid && (
-					<span className="error-message">Недопустимый ввод</span>
-				)}
-				<Input
-					type="text"
-					placeholder="Key"
-					value={form.key}
-					onChange={(event) =>
-						setForm((prev) => ({
-							...prev,
-							key: event.target.value,
-						}))
-					}
-				/>
-				{!isKeyValid && (
-					<span className="error-message">Недопустимый ввод</span>
-				)}
-			</div>
-			<TextArea
-				value={form.textArea}
-				onChange={(event) =>
-					setForm((prev) => ({
-						...prev,
-						textArea: event.target.value,
-					}))
-				}
-			/>
-			<div className="button__section">
-				<Button
-					key={1}
-					callback={encrypt}
-					disabled={!isInputValid && !isKeyValid}
-				>
-					Зашифровать
-				</Button>
-				<input type="file" key={2} onChange={handleFileChange}></input>
-				<Button
-					key={3}
-					callback={decrypt}
-					disabled={!isInputValid && !isKeyValid}
-				>
-					Расшифровать
-				</Button>
-			</div>
-		</form>
-	);
+  return (
+    <form className="form">
+      <div className="input__section">
+        <Input
+          type="text"
+          placeholder="Input"
+          value={form.input}
+          onChange={(event) =>
+
+            setForm((prev) => ({ ...prev, input: event.target.value })
+          )
+          }
+        />
+        {!isInputValid && (
+          <span className="error-message">Недопустимый ввод</span>
+        )}
+        <Input
+          type="text"
+          placeholder="Key"
+          value={form.key}
+          onChange={(event) =>
+            setForm((prev) => ({
+              ...prev,
+              key: event.target.value,
+            }))
+          }
+        />
+        {!isKeyValid && (
+          <span className="error-message">Недопустимый ввод</span>
+        )}
+      </div>
+      <TextArea
+        value={form.textArea}
+        onChange={(event) =>
+          setForm((prev) => ({ ...prev, textArea: event.target.value }))
+        }
+      />
+      <div className="button__section">
+        <Button key={1} onclick={encrypt} disabled={!isInputValid || !isKeyValid}>
+          Зашифровать
+        </Button>
+        {setJsonData && <input type="file" key={2} onChange={handleFileChange}></input>}
+        <Button key={3} onclick={decrypt} disabled={!isInputValid || !isKeyValid}>
+          Расшифровать
+        </Button>
+      </div>
+    </form>
+  );
 }
 
 export { Form };
