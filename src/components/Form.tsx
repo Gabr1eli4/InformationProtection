@@ -4,61 +4,61 @@ import { Button } from "./Button";
 import { MouseEventHandler, SetStateAction, useEffect, useState } from "react";
 
 export interface FormProps {
-  key: string;
-  input: string;
-  textArea: string;
+	key: string;
+	input: string;
+	textArea: string;
 }
 
 interface FormFunctionProps {
-  decrypt: MouseEventHandler<HTMLButtonElement>;
-  encrypt: MouseEventHandler<HTMLButtonElement>;
-  form: FormProps;
-  setForm: React.Dispatch<SetStateAction<FormProps>>;
-  setJsonData?: React.Dispatch<SetStateAction<FormProps | null>>;
-  keyValidate?: (string: string) => boolean;
-  inputValidate?: (string: string) => boolean;
+	decrypt: MouseEventHandler<HTMLButtonElement>;
+	encrypt: MouseEventHandler<HTMLButtonElement>;
+	form: FormProps;
+	setForm: React.Dispatch<SetStateAction<FormProps>>;
+	setJsonData?: React.Dispatch<SetStateAction<FormProps | null>>;
+	keyValidate?: (string: string) => boolean;
+	inputValidate?: (string: string) => boolean;
 }
 
 function Form({
-  decrypt,
-  encrypt,
-  form,
-  setForm,
-  setJsonData,
-  keyValidate = () => true,
-  inputValidate = () => true,
+	decrypt,
+	encrypt,
+	form,
+	setForm,
+	setJsonData,
+	keyValidate = () => true,
+	inputValidate = () => true,
 }: FormFunctionProps) {
-  const [isInputValid, setIsInputValid] = useState<boolean>(true);
-  const [isKeyValid, setIsKeyValid] = useState<boolean>(true);
+	const [isInputValid, setIsInputValid] = useState<boolean>(true);
+	const [isKeyValid, setIsKeyValid] = useState<boolean>(true);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (setJsonData) {
-      const file = event.target.files?.[0];
+	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		if (setJsonData) {
+			const file = event.target.files?.[0];
 
-      if (file) {
-        const reader = new FileReader();
+			if (file) {
+				const reader = new FileReader();
 
-        reader.onload = (e) => {
-          try {
-            const json = JSON.parse(e.target?.result as string);
-            setJsonData(json);
-          } catch (error) {
-            console.error("Ошибка парсинга JSON:", error);
-            setJsonData(null);
-          }
-        };
+				reader.onload = (e) => {
+					try {
+						const json = JSON.parse(e.target?.result as string);
+						setJsonData(json);
+					} catch (error) {
+						console.error("Ошибка парсинга JSON:", error);
+						setJsonData(null);
+					}
+				};
 
-        reader.readAsText(file);
-      } else {
-        setJsonData(null);
-      }
-    }
-  };
+				reader.readAsText(file);
+			} else {
+				setJsonData(null);
+			}
+		}
+	};
 
-  useEffect(() => {
-    setIsInputValid(inputValidate(form.input));
-    setIsKeyValid(keyValidate(form.key));
-  }, [form.input, form.key, inputValidate, keyValidate]);
+	useEffect(() => {
+		setIsInputValid(inputValidate(form.input));
+		setIsKeyValid(keyValidate(form.key));
+	}, [form.input, form.key, inputValidate, keyValidate]);
 
   return (
     <form className="form">
