@@ -1,14 +1,14 @@
 import { MouseEventHandler, useState } from "react";
-import { Form, FormProps } from "../../components/Form";
-import { des } from "../helpers/desEnc";
+import { Form, FormProps } from "../../components/Form"
 import { binToDec, decToBin, gamming, generateKeys, getBitBlock, shift } from "../helpers/des";
+import { des } from "../helpers/desEnc";
 
-function CFBMethodForm() {
-	const [form, setForm] = useState<FormProps>({
-		key: "",
-		input: "",
-		textArea: "",
-	});
+function OFBMethodForm() {
+  const [form, setForm] = useState<FormProps>({
+    key: "",
+    input: "",
+    textArea: "",
+  });
 
 	let pseudoRandomSequence =
 		"0101000000101100101011000100010000000000010000000101000000101100";
@@ -24,9 +24,10 @@ function CFBMethodForm() {
 			const blockOfInput = input.slice(i * k, (i + 1) * k).split("");
 			const blockOfCode = getBitBlock(blockOfInput);
 
+			pseudoRandomSequence = shift(new Uint8Array(pseudoRandomSequence.split("").map(item => +item)), k).toString();
+
 			const bruh = gamming(blockOfCode, enc);
 
-			pseudoRandomSequence = shift(new Uint8Array(pseudoRandomSequence.split("").map(item => +item)), k).toString();
 			result += binToDec(bruh.join(""), k).join("");
 		}
 		setForm(prev => ({ ...prev, textArea: result}));
@@ -46,23 +47,16 @@ function CFBMethodForm() {
 			const blockOfInput = input.slice(i * k, (i + 1) * k).split("");
 			const blockOfCode = getBitBlock(blockOfInput);
 
+			pseudoRandomSequence = shift(new Uint8Array(pseudoRandomSequence.split("").map(item => +item)), k).toString();
+
 			const bruh = gamming(blockOfCode, enc);
 
-			pseudoRandomSequence = shift(new Uint8Array(pseudoRandomSequence.split("").map(item => +item)), k).toString();
 			result += binToDec(bruh.join(""), k).join("");
 		}
 		setForm(prev => ({ ...prev, textArea: result}));
 	};
 
-	return (
-		<Form
-			encrypt={encryptHandler}
-			decrypt={decryptHandler}
-			form={form}
-			setForm={setForm}
-			keyValidate={(key) => key.length % 8 === 0}
-		/>
-	);
+  return <Form encrypt={encryptHandler} decrypt={decryptHandler} form={form} setForm={setForm} keyValidate={(key) => key.length % 8 === 0}/>
 }
 
-export { CFBMethodForm };
+export { OFBMethodForm };

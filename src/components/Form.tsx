@@ -98,11 +98,11 @@ function Form({
         }
       />
       <div className="button__section">
-        <Button key={1} onclick={encrypt} disabled={!isInputValid || !isKeyValid}>
+        <Button key={1} callback={encrypt} disabled={!isInputValid || !isKeyValid}>
           Зашифровать
         </Button>
         {setJsonData && <input type="file" key={2} onChange={handleFileChange}></input>}
-        <Button key={3} onclick={decrypt} disabled={!isInputValid || !isKeyValid}>
+        <Button key={3} callback={decrypt} disabled={!isInputValid || !isKeyValid}>
           Расшифровать
         </Button>
       </div>
