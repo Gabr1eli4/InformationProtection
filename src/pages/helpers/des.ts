@@ -54,11 +54,7 @@ export const binToDec = (arr: string, size: number) => {
 };
 
 export const decToBin = (arr: string) => {
-	const result = [];
-	for (let i = 0; i < arr.length; i++) {
-		result.push(arr[i].charCodeAt(0).toString(2).padStart(8, "0"));
-	}
-	return result;
+	return arr.split("").map(item => item.charCodeAt(0)?.toString(2).padStart(8, "0"));
 };
 
 export const sBoxCalc = (block: Uint8Array): Uint8Array => {
