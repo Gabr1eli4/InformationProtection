@@ -12,17 +12,22 @@ function SteganographicMethod() {
 	// message: string - Текст-Контейнер
 	// length: number - Количество бит шифруемого текста
 	const messageProcessing = (message: string, length: number, separator: string | Array<string>) => {
-		// const sentenceEndsRegex = /[.!?]\s/g;
-		// const matches = message.matchAll(sentenceEndsRegex);
-
-		// const endIndices: number[] = [];
-		// for (const match of matches) {
-		// 	endIndices.push(match.index! + match[0].length);
-		// }
-		
 		for (let i = 0; i < message.length; i++) {
 			if (separator.includes(message[i])) {
-				
+				let numOfSpaces = 0;
+				i++;
+
+				while(message[i] == " ") {
+					if (message[i] === undefined) break;
+					numOfSpaces++;
+					i++;
+				} 
+
+				console.log("numOfSpaces", numOfSpaces);
+				// Проверить наличие пробела
+				// Удалить лишние пробелы
+				// Добавить пробел если кодируется 0
+				// Оставить один пробел если кодируется 1
 			}
 		}
 	}
@@ -33,7 +38,7 @@ function SteganographicMethod() {
 		const input = form.input;
 		if (input && key) {
 			const binInput: Array<string> = decToBin(input, 8);
-			messageProcessing(key, binInput.length * binInput[0].length);
+			messageProcessing(key, binInput.length * binInput[0].length, ".?!");
 		}
 	}
 
@@ -44,5 +49,6 @@ function SteganographicMethod() {
 
 	return <Form form={form} setForm={setForm} encrypt={encryptHandler} decrypt={decryptHandler}></Form>
 }
+
 
 export { SteganographicMethod }
