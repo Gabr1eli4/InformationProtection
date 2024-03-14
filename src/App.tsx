@@ -9,6 +9,7 @@ import { CBCMethodForm } from "./pages/lb_5/CBCMethodForm";
 import { CFBMethodForm } from "./pages/lb_6/CFBMethodForm";
 import { OFBMethodForm } from "./pages/lb_7/OFBMethodForm";
 import { SteganographicMethod } from "./pages/lb_8/SteganographicMethod";
+import { SecondSteganographicMethod } from "./pages/lb_9/SecondSteganographicMethod";
 
 function App() {
 	return (
@@ -22,6 +23,7 @@ function App() {
 				<Route path="6" element={<CFBMethodForm />}/>
 				<Route path="7" element={<OFBMethodForm />}/>
 				<Route path="8" element={<SteganographicMethod />}/>
+				<Route path="9" element={<SecondSteganographicMethod />}/>
 			</Route>
 		</Routes>
 	);
